@@ -6,7 +6,7 @@ using YamlDotNet.Serialization;
 public class ShowConfiguration
 {
     //these are both saved as part of a show configuration, and as part of player prefs
-    public IDMXSerializer Serializer;
+    public List<IDMXSerializer> Serializers;
     public IDMXSerializer Deserializer;
     public List<IDMXGenerator> Generators;
     public List<IExporter> Exporters;

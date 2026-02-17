@@ -31,6 +31,8 @@ public class Loader : MonoBehaviour
     ISerializer ymlserializer;
     public UIController uiController;
 
+    public static GPUSerializerManager gpuSerializerManager;
+
     void Start()
     {
         spoutReceiver = FindObjectOfType<SpoutReceiver>();
@@ -42,6 +44,9 @@ public class Loader : MonoBehaviour
         generators = GetAllInterfaceImplementations<IDMXGenerator>();
         exporters = GetAllInterfaceImplementations<IExporter>();
 
+        gpuSerializerManager = FindAnyObjectByType<GPUSerializerManager>();
+        showconf.Serializers = new List<IDMXSerializer>();
+
         //startup all interface lists
         interfaceLists = FindObjectsByType<InterfaceList>(FindObjectsInactive.Include, FindObjectsSortMode.None).ToList();
         foreach (var interfaceList in interfaceLists)
@@ -52,8 +57,9 @@ public class Loader : MonoBehaviour
         Debug.Log($"Loaded {serializers.Count} serializers");
 
         //default the serializers to VRSL and have transcode off
-        showconf.Serializer = new VRSL();
-        showconf.Deserializer = new VRSL();
+        showconf.Serializers.Add(serializers.Last());
+        gpuSerializerManager.UpdateGPUSerializerZones(ref showconf.Serializers);
+        showconf.Deserializer = serializers.Last();
         //showconf.Transcode = false;
         showconf.TranscodeUniverseCount = 3;
         showconf.SerializeUniverseCount = int.MaxValue;
@@ -127,7 +133,13 @@ public class Loader : MonoBehaviour
 
         return types
             .Where(t => !t.IsInterface && !t.IsAbstract)
-            .Select(t => (T)Activator.CreateInstance(t))
+            .Select(t => (T)Activator.CreateInstance(t, 
+                t.GetConstructors()
+                    .First()
+                    .GetParameters()
+                    .Select(t => 
+                        Activator.CreateInstance(t.ParameterType)
+                    ).ToArray()))
             .ToList();
     }
 
@@ -208,7 +220,12 @@ public class Loader : MonoBehaviour
             exporter.Deconstruct();
         }
 
-        showconf.Serializer.Deconstruct();
+        foreach (var serializer in showconf.Serializers)
+        {
+            serializer.DeconstructUserInterface();
+            serializer.Deconstruct();
+        }
+
         showconf.Deserializer.Deconstruct();
     }
 
@@ -242,7 +259,11 @@ public class Loader : MonoBehaviour
             exporter.Construct();
         }
 
-        showconf.Serializer.Construct();
+        foreach (var serializer in showconf.Serializers)
+        {
+            serializer.Construct();
+        }
+
         showconf.Deserializer.Construct();
 
         //setup spout input/outputs

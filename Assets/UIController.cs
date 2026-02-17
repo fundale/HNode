@@ -62,8 +62,10 @@ public class UIController : MonoBehaviour
 
         serializerDropdown.onValueChanged.AddListener((index) =>
         {
-            Loader.showconf.Serializer = Loader.serializers[index];
+            Loader.showconf.Serializers[0] = Loader.serializers[index];
             Loader.ReloadShowConf();
+            Loader.gpuSerializerManager.UpdateGPUSerializerZones(ref Loader.showconf.Serializers);
+            Loader.gpuSerializerManager.UpdateGPUSerializerChannelMeta();
             InvalidateUIState();
         });
 
@@ -170,7 +172,7 @@ public class UIController : MonoBehaviour
     public void InvalidateUIState()
     {
         //serializer setup
-        RebuildDropdown(serializerDropdown, Loader.serializers.Select(x => x.GetType().Name).ToList(), Loader.showconf.Serializer?.GetType().Name ?? string.Empty);
+        RebuildDropdown(serializerDropdown, Loader.serializers.Select(x => x.GetType().Name).ToList(), Loader.showconf.Serializers?.ElementAt(0)?.GetType().Name ?? string.Empty);
         serializeUniverseCountField.WithText(Loader.showconf.SerializeUniverseCount.ToString());
         invertMaskToggle.WithValue(Loader.showconf.invertMask);
         autoMaskOnZeroToggle.WithValue(Loader.showconf.autoMaskOnZero);
@@ -178,7 +180,10 @@ public class UIController : MonoBehaviour
         artNetPortField.WithText(Loader.showconf.ArtNetPort.ToString());
         artNetAddressField.WithText(Loader.showconf.ArtNetAddress.ToString());
 
-        Loader.showconf.Serializer.DeconstructUserInterface();
+        foreach (var serializer in Loader.showconf.Serializers)
+        {
+            serializer.DeconstructUserInterface();
+        }
 
         //destroy the dynamic area
         foreach (Transform child in serializerDynamicSettingsRect)
@@ -187,7 +192,10 @@ public class UIController : MonoBehaviour
         }
 
         //rebuild the dynamic area
-        Loader.showconf.Serializer.ConstructUserInterface(serializerDynamicSettingsRect);
+        foreach (var serializer in Loader.showconf.Serializers)
+        {
+            serializer.ConstructUserInterface(serializerDynamicSettingsRect);
+        }
 
         //deserializer setup
         RebuildDropdown(deserializerDropdown, Loader.serializers.Select(x => x.GetType().Name).ToList(), Loader.showconf.Deserializer?.GetType().Name ?? string.Empty);

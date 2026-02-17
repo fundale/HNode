@@ -22,6 +22,28 @@ public class TextureWriter : MonoBehaviour
     private System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
     public TextMeshProUGUI frameTime;
     public Material mat;
+    public Image[] serializerDisplayPanels;
+    public bool gpuSerialization
+    {
+        get => _gpuSerialization;
+        set {
+            _gpuSerialization = value;
+
+            foreach (Image serializerDisplay in serializerDisplayPanels)
+                if (serializerDisplay != null)
+                    serializerDisplay.enabled = false;
+
+            Texture outputTexture = _gpuSerialization ? Loader.gpuSerializerManager.gpuSerializerRenderTexture : texture;
+
+            spoutSender.sourceTexture = outputTexture;
+            mat.mainTexture = outputTexture;
+
+            foreach (Image serializerDisplay in serializerDisplayPanels)
+                if (serializerDisplay != null)
+                    serializerDisplay.enabled = true;
+        }
+    }
+    private bool _gpuSerialization;
     private Color32[] pixels;
 
     void Start()
@@ -37,8 +59,7 @@ public class TextureWriter : MonoBehaviour
         texture.filterMode = FilterMode.Point;
         texture.wrapMode = TextureWrapMode.Clamp;
 
-        spoutSender.sourceTexture = texture;
-        mat.mainTexture = texture;
+        gpuSerialization = false;
 
         pixels = new Color32[TextureWidth * TextureHeight];
     }
@@ -48,12 +69,6 @@ public class TextureWriter : MonoBehaviour
     {
         //start a profiler timer
         timer.Restart();
-
-        Profiler.BeginSample("Texture Clear");
-        //fill with transparent
-        var color = new Color32(0, 0, 0, 0);
-        Array.Fill(pixels, color);
-        Profiler.EndSample();
 
         Profiler.BeginSample("DMX Merge");
         List<byte> mergedDmxValues = new List<byte>();
@@ -73,8 +88,8 @@ public class TextureWriter : MonoBehaviour
                 mergedDmxValues.AddRange(dmxValues);
             }
         }
-
         Profiler.EndSample();
+
         Profiler.BeginSample("DMX Generators");
         //now run the generators in order
         foreach (var generator in Loader.showconf.Generators)
@@ -83,62 +98,87 @@ public class TextureWriter : MonoBehaviour
         }
         Profiler.EndSample();
 
-        Loader.showconf.Serializer.InitFrame(ref mergedDmxValues);
+        foreach (var serializer in Loader.showconf.Serializers)
+        {
+            serializer.InitFrame(ref mergedDmxValues);
+        }
         foreach (var exporter in Loader.showconf.Exporters)
         {
             exporter.InitFrame(ref mergedDmxValues);
         }
 
-        Profiler.BeginSample("Serializer Loop");
-        var ChannelsToSerialize = Math.Min((long)Loader.showconf.SerializeUniverseCount * 512, mergedDmxValues.Count);
-        for (int i = 0; i < ChannelsToSerialize; i++)
+        if (_gpuSerialization)
         {
-            //check if between any masked channel sets
-            bool isMasked = false;
-            foreach (var channel in Loader.showconf.maskedChannels)
+            Profiler.BeginSample("GPU Serializer Upload");
+
+                Loader.gpuSerializerManager.RefreshGPUSerializer(ref mergedDmxValues);
+                
+            Profiler.EndSample();
+        } else
+        {
+            Profiler.BeginSample("Texture Clear");
+            //fill with transparent
+            var color = new Color32(0, 0, 0, 0);
+            Array.Fill(pixels, color);
+            Profiler.EndSample();
+
+            Profiler.BeginSample("Serializer Loop");
+            var ChannelsToSerialize = Math.Min((long)Loader.showconf.SerializeUniverseCount * 512, mergedDmxValues.Count);
+            for (int i = 0; i < ChannelsToSerialize; i++)
             {
-                if (channel.Contains(i))
+                //check if between any masked channel sets
+                bool isMasked = false;
+                foreach (var channel in Loader.showconf.maskedChannels)
                 {
-                    isMasked = true;
-                    break;
+                    if (channel.Contains(i))
+                    {
+                        isMasked = true;
+                        break;
+                    }
                 }
-            }
 
-            if (Loader.showconf.invertMask)
-            {
-                isMasked = !isMasked;
-            }
+                if (Loader.showconf.invertMask)
+                {
+                    isMasked = !isMasked;
+                }
 
-            //skip the channel if its masked
-            if (isMasked)
-            {
-                continue;
-            }
+                //skip the channel if its masked
+                if (isMasked)
+                {
+                    continue;
+                }
 
-            Profiler.BeginSample("Individual Channel Serialization");
-            Loader.showconf.Serializer.SerializeChannel(ref pixels, mergedDmxValues[i], i, TextureWidth, TextureHeight);
-            foreach (var exporter in Loader.showconf.Exporters)
-            {
-                exporter.SerializeChannel(mergedDmxValues[i], i);
+                Profiler.BeginSample("Individual Channel Serialization");
+                foreach (var serializer in Loader.showconf.Serializers)
+                {
+                    serializer.SerializeChannel(ref pixels, mergedDmxValues[i], i, TextureWidth, TextureHeight);
+                }
+                foreach (var exporter in Loader.showconf.Exporters)
+                {
+                    exporter.SerializeChannel(mergedDmxValues[i], i);
+                }
+                Profiler.EndSample();
             }
             Profiler.EndSample();
+
+            Profiler.BeginSample("Frame Finalization");
+            foreach (var serializer in Loader.showconf.Serializers)
+            {
+                serializer.CompleteFrame(ref pixels, ref mergedDmxValues, TextureWidth, TextureHeight);
+            }
+            foreach (var exporter in Loader.showconf.Exporters)
+            {
+                exporter.CompleteFrame(ref mergedDmxValues);
+            }
+            Profiler.EndSample();
+
+            //send to the UV Remapper
+
+            Profiler.BeginSample("Texture Write");
+            texture.SetPixels32(pixels);
+            texture.Apply();
+            Profiler.EndSample();
         }
-        Profiler.EndSample();
-
-        Profiler.BeginSample("Frame Finalization");
-        Loader.showconf.Serializer.CompleteFrame(ref pixels, ref mergedDmxValues, TextureWidth, TextureHeight);
-        foreach (var exporter in Loader.showconf.Exporters)
-        {
-            exporter.CompleteFrame(ref mergedDmxValues);
-        }
-        Profiler.EndSample();
-
-        //send to the UV Remapper
-
-        Profiler.BeginSample("Texture Write");
-        texture.SetPixels32(pixels);
-        texture.Apply();
-        Profiler.EndSample();
 
         timer.Stop();
 

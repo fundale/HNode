@@ -7,9 +7,32 @@ using UnityEngine;
 
 public class Ternary : IDMXSerializer
 {
-    const int blockSize = 4; // 10x10 pixels per channel block
+    public Vector2 Origin { get; }
+    public Vector2 Size { get; }
+    public int DataOffset { get; }
+    public int DataLength { get; }
+    public int Universe { get; }
+    public int BlockSize { get; }
+    public CustomRenderTextureUpdateZone RTUpdateZone { get; }
     const int blocksPerCol = 8 * 6; // channels per column
+    
+    public Ternary(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 1), int ?universe = 0, int ?blockSize = 4)
+    {
+        Origin = origin ?? Vector2.zero;
+        Size = size ?? new Vector2(1920, 208);
+        DataOffset = dataOffset ?? 0;
+        DataLength = dataLength ?? (512 * 1); // TODO: Change
+        Universe = universe ?? 0;
+        BlockSize = blockSize ?? 4; // 4x4 pixels per channel block
 
+        CustomRenderTextureUpdateZone updateZone = new CustomRenderTextureUpdateZone();
+        
+        updateZone.updateZoneCenter = (Size / 2) + Origin;
+        updateZone.updateZoneSize = Size;
+        updateZone.passIndex = GPUSerializerManager.FindPass(this);
+        
+        RTUpdateZone = updateZone;
+    }
     public void Construct() { }
     public void Deconstruct() { }
     public void InitFrame(ref List<byte> channelValues) { }
@@ -38,7 +61,7 @@ public class Ternary : IDMXSerializer
                 intensity,
                 Util.GetBlockAlpha(channelValue)
             );
-            TextureWriter.MakeColorBlock(ref pixels, x, y, color, blockSize);
+            TextureWriter.MakeColorBlock(ref pixels, x, y, color, BlockSize);
         }
     }
 
@@ -63,11 +86,11 @@ public class Ternary : IDMXSerializer
         channelValue = ConvertToByte(bits);
     }
 
-    private static void GetPositionData(int channel, int i, out int x, out int y)
+    private void GetPositionData(int channel, int i, out int x, out int y)
     {
         int newChannel = (channel * 6) + i;
-        x = (newChannel / blocksPerCol) * blockSize;
-        y = (newChannel % blocksPerCol) * blockSize;
+        x = (newChannel / blocksPerCol) * BlockSize;
+        y = (newChannel % blocksPerCol) * BlockSize;
     }
 
     byte ConvertToByte(BitArray bits)

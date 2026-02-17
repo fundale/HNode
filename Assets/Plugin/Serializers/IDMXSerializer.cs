@@ -7,6 +7,35 @@ using static Util;
 public interface IDMXSerializer : IUserInterface<IDMXGenerator>, IConstructable
 {
     /// <summary>
+    /// The beginning of the Serializer on the Canvas. (top left)
+    /// </summary>
+    public Vector2 Origin { get; }
+    /// <summary>
+    /// Size of the Serializer.
+    /// </summary>
+    public Vector2 Size { get; }
+    /// <summary>
+    /// Beginning of the Serializer data in a Universe.
+    /// </summary>
+    public int DataOffset { get; }
+    /// <summary>
+    /// Size of Serilaizer data in the Universe.
+    /// </summary>
+    public int DataLength { get; }
+    /// <summary>
+    /// The Universe to start the Serializer on.
+    /// </summary>
+    public int Universe { get; }
+    /// <summary>
+    /// The block size of each data byte value or bit.
+    /// </summary>
+    public int BlockSize { get; }
+    /// <summary>
+    /// The GPU Serializer update info.
+    /// </summary>
+    public CustomRenderTextureUpdateZone RTUpdateZone { get; }
+
+    /// <summary>
     /// Serializes a channel from a raw byte representation, to a output video stream.
     /// </summary>
     /// <param name="pixels"></param>

@@ -6,18 +6,41 @@ using UnityEngine.Profiling;
 
 public class BinaryStageFlight : IDMXSerializer
 {
-    const int blockSize = 4; // 10x10 pixels per channel block
+    public Vector2 Origin { get; }
+    public Vector2 Size { get; }
+    public int DataOffset { get; }
+    public int DataLength { get; }
+    public int Universe { get; }
+    public int BlockSize { get; }
+    public CustomRenderTextureUpdateZone RTUpdateZone { get; }
     const int channelsPerCol = 6;
     const int blocksPerCol = channelsPerCol * 8; // channels per column
     const int CRCBits = 4;
+    
+    public BinaryStageFlight(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 28), int ?universe = 0, int ?blockSize = 4)
+    {
+        Origin = origin ?? Vector2.zero;
+        Size = size ?? new Vector2(1920, 1080);
+        DataOffset = dataOffset ?? 0;
+        DataLength = dataLength ?? (512 * 28);
+        Universe = universe ?? 0;
+        BlockSize = blockSize ?? 4; // 4x4 pixels per channel block
 
+        CustomRenderTextureUpdateZone updateZone = new CustomRenderTextureUpdateZone();
+        
+        updateZone.updateZoneCenter = (Size / 2) + Origin;
+        updateZone.updateZoneSize = Size;
+        updateZone.passIndex = GPUSerializerManager.FindPass(this);
+        
+        RTUpdateZone = updateZone;
+    }
     public void Construct() { }
     public void Deconstruct() { }
     public void InitFrame(ref List<byte> channelValues) { }
     public void CompleteFrame(ref Color32[] pixels, ref List<byte> channelValues, int textureWidth, int textureHeight)
     {
         //figure out the lowest pixel it wouldve drawn before
-        int startY = blocksPerCol * blockSize;
+        int startY = blocksPerCol * BlockSize;
 
         //expand channelValues to a multiple of channelsPerCol
         int rounded = (int)(Math.Ceiling(channelValues.Count / (double)channelsPerCol) * channelsPerCol);
@@ -31,12 +54,12 @@ public class BinaryStageFlight : IDMXSerializer
             var crc = Crc4(values);
 
             //calculate the x
-            int x = (i / channelsPerCol) * blockSize;
+            int x = (i / channelsPerCol) * BlockSize;
             //draw the 4 bits
             var bits = new BitArray(new byte[] { crc });
             for (int j = 0; j < /* bits.Length */ CRCBits; j++)
             {
-                int y = startY + j * blockSize;
+                int y = startY + j * BlockSize;
                 CalculateWrapping(x, y, out int xd, out int yd, textureWidth);
                 //convert the x y to pixel index
                 //return 4x4 area
@@ -49,7 +72,7 @@ public class BinaryStageFlight : IDMXSerializer
                     (byte)(bits[j] ? 255 : 0), */
                     Util.GetBlockAlpha(255) // Alpha should be forced on always
                 );
-                TextureWriter.MakeColorBlock(ref pixels, xd, yd, color, blockSize);
+                TextureWriter.MakeColorBlock(ref pixels, xd, yd, color, BlockSize);
             }
         }
     }
@@ -76,7 +99,7 @@ public class BinaryStageFlight : IDMXSerializer
                 val,
                 Util.GetBlockAlpha(channelValue)
             );
-            TextureWriter.MakeColorBlock(ref pixels, x, y, color, blockSize);
+            TextureWriter.MakeColorBlock(ref pixels, x, y, color, BlockSize);
         }
     }
 
@@ -102,21 +125,21 @@ public class BinaryStageFlight : IDMXSerializer
         channelValue = ConvertToByte(bits);
     }
 
-    private static void GetPositionData(int channel, int i, int textureWidth, out int x, out int y)
+    private void GetPositionData(int channel, int i, int textureWidth, out int x, out int y)
     {
         //int newChannel = (channel * 8) + i;
         //encode backwards, endiannes flip
         int newChannel = (channel * 8) + (7 - i);
-        x = (newChannel / blocksPerCol) * blockSize;
-        y = (newChannel % blocksPerCol) * blockSize;
+        x = (newChannel / blocksPerCol) * BlockSize;
+        y = (newChannel % blocksPerCol) * BlockSize;
         CalculateWrapping(x, y, out x, out y, textureWidth);
     }
 
-    private static void CalculateWrapping(int x, int y, out int adjx, out int adjy, int textureWidth)
+    private void CalculateWrapping(int x, int y, out int adjx, out int adjy, int textureWidth)
     {
         int wrap = x / textureWidth;
         adjx = x % textureWidth;
-        adjy = y + (wrap * (blocksPerCol + CRCBits) * blockSize); // +4 is for the CRC bits
+        adjy = y + (wrap * (blocksPerCol + CRCBits) * BlockSize); // +4 is for the CRC bits
     }
 
     byte ConvertToByte(BitArray bits)

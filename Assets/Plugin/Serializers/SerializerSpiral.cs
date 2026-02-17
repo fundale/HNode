@@ -5,12 +5,35 @@ using UnityEngine;
 
 public class Spiral : IDMXSerializer
 {
-    const int blockSize = 8; // 10x10 pixels per channel block
+    public Vector2 Origin { get; }
+    public Vector2 Size { get; }
+    public int DataOffset { get; }
+    public int DataLength { get; }
+    public int Universe { get; }
+    public int BlockSize { get; }
+    public CustomRenderTextureUpdateZone RTUpdateZone { get; }
     int x = 0;
     int y = 0;
     int state = 0;
     List<Vector2Int> visited = new List<Vector2Int>();
 
+    public Spiral(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 32), int ?universe = 0, int ?blockSize = 8)
+    {
+        Origin = origin ?? Vector2.zero;
+        Size = size ?? new Vector2(1920, 1080);
+        DataOffset = dataOffset ?? 0;
+        DataLength = dataLength ?? (512 * 32); // TODO: Change
+        Universe = universe ?? 0;
+        BlockSize = blockSize ?? 8; // 8x8 pixels per channel block
+
+        CustomRenderTextureUpdateZone updateZone = new CustomRenderTextureUpdateZone();
+        
+        updateZone.updateZoneCenter = (Size / 2) + Origin;
+        updateZone.updateZoneSize = Size;
+        updateZone.passIndex = GPUSerializerManager.FindPass(this);
+        
+        RTUpdateZone = updateZone;
+    }
     public void Construct() { }
     public void Deconstruct() { }
     public void InitFrame(ref List<byte> channelValues)
@@ -24,13 +47,13 @@ public class Spiral : IDMXSerializer
 
     public void SerializeChannel(ref Color32[] pixels, byte channelValue, int channel, int textureWidth, int textureHeight)
     {
-        int scaledWidth = textureWidth / blockSize;
-        int scaledHeight = textureHeight / blockSize;
+        int scaledWidth = textureWidth / BlockSize;
+        int scaledHeight = textureHeight / BlockSize;
 
 
         //multiply up by block size
-        int xfinal = x * blockSize;
-        int yfinal = y * blockSize;
+        int xfinal = x * BlockSize;
+        int yfinal = y * BlockSize;
 
         //convert the x y to pixel index
         //return 4x4 area
@@ -40,7 +63,7 @@ public class Spiral : IDMXSerializer
             channelValue,
             Util.GetBlockAlpha(channelValue)
         );
-        TextureWriter.MakeColorBlock(ref pixels, xfinal, yfinal, color, blockSize);
+        TextureWriter.MakeColorBlock(ref pixels, xfinal, yfinal, color, BlockSize);
 
         int nextX = x;
         int nextY = y;
