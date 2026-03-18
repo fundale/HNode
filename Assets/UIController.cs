@@ -30,6 +30,7 @@ public class UIController : MonoBehaviour
     private TMP_InputField spoutOutputNameField;
     private TMP_InputField artNetPortField;
     private TMP_InputField artNetAddressField;
+    private Toggle gpuSerializationToggle;
     #endregion
 
     #region Deserializer Settings
@@ -128,6 +129,17 @@ public class UIController : MonoBehaviour
                 Loader.showconf.ArtNetAddress = value;
                 Loader.ReloadShowConf();
                 InvalidateUIState();
+            });
+
+        TextureWriter textureWriter = FindAnyObjectByType<TextureWriter>();
+
+        gpuSerializationToggle = AddToggle(serializerStaticSettingsRect, "Serializer GPU Accelleration")
+            .WithValue(textureWriter.gpuSerialization)
+            .WithCallback((isOn) =>
+            {
+                textureWriter.gpuSerialization = isOn;
+                // Loader.ReloadShowConf();
+                // InvalidateUIState();
             });
 
         deserializerDropdown.onValueChanged.AddListener((index) =>
