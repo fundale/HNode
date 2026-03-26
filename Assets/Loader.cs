@@ -58,7 +58,7 @@ public class Loader : MonoBehaviour
 
         //default the serializers to VRSL and have transcode off
         showconf.Serializers.Add(serializers.Last());
-        gpuSerializerManager.UpdateGPUSerializerZones(ref showconf.Serializers);
+        gpuSerializerManager.FullUpdate();
         showconf.Deserializer = serializers.Last();
         //showconf.Transcode = false;
         showconf.TranscodeUniverseCount = 3;

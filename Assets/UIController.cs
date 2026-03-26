@@ -65,8 +65,7 @@ public class UIController : MonoBehaviour
         {
             Loader.showconf.Serializers[0] = Loader.serializers[index];
             Loader.ReloadShowConf();
-            Loader.gpuSerializerManager.UpdateGPUSerializerZones(ref Loader.showconf.Serializers);
-            Loader.gpuSerializerManager.UpdateGPUSerializerChannelMeta();
+            Loader.gpuSerializerManager.FullUpdate();
             InvalidateUIState();
         });
 

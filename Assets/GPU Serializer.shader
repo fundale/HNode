@@ -324,13 +324,23 @@ Shader "HNode/GPU Serializer"
 
                 if (serializerPixel.y < vBlocks && channel < (serializerRange.x + serializerRange.y) && validBlock && renderChannel)
                 {
-                    serializerColor = LinearToSRGB(ChannelGetByte(channel)); // TODO: Toggle this
-                    if (false) // TODO: 9 universe mode
+                    uint vrslFlags = SerializerMode(serializerSize) & 0x03;
+
+                    serializerColor = ChannelGetByte(channel);
+
+                    if ((vrslFlags >> 1) & 0x01) // 9 universe mode RGB packing
                     {
-                        serializerColor.r = LinearToSRGB(ChannelGetByte(channel));
-                        serializerColor.g = LinearToSRGB(ChannelGetByte(channel + (512 * 3)));
-                        serializerColor.b = LinearToSRGB(ChannelGetByte(channel + (512 * 3 * 2)));
+                        serializerColor.g = ChannelGetByte(channel + (512 * 3));
+                        serializerColor.b = ChannelGetByte(channel + (512 * 3 * 2));
                     }
+
+                    if (vrslFlags & 0x01) // Linear to sRGB legacy support
+                    {
+                        serializerColor.r = LinearToSRGB(serializerColor.r);
+                        serializerColor.g = LinearToSRGB(serializerColor.g);
+                        serializerColor.b = LinearToSRGB(serializerColor.b);
+                    } else serializerColor /= 255.0;
+                    
                     serializerColor.a = 1.0;
                 } else discard;
                     

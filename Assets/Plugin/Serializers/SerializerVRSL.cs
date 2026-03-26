@@ -20,11 +20,47 @@ public class VRSL : IDMXSerializer
     public int Universe { get; }
     public int BlockSize { get; }
     public int RowCount { get; }
-    public CustomRenderTextureUpdateZone RTUpdateZone { get; }
+    public CustomRenderTextureUpdateZone RTUpdateZone {
+        get => _rtUpdateZone;
+        set => _rtUpdateZone = value;
+    }
 
-    public bool GammaCorrection = true;
-    public bool RGBGridMode = false;
-    public OutputConfigs outputConfig = OutputConfigs.HorizontalTop;
+    public bool GammaCorrection
+    {
+        get => _gammaCorrection;
+        set {
+            _gammaCorrection = value;
+
+            Loader.gpuSerializerManager.FullUpdate();
+        }
+    }
+    public bool RGBGridMode
+    {
+        get => _rgbGridMode;
+        set {
+            _rgbGridMode = value;
+
+            Loader.gpuSerializerManager.FullUpdate();
+        }
+    }
+    public OutputConfigs outputConfig
+    {
+        get => _outputConfig;
+        set {
+            _outputConfig = value;
+
+            bool vertical = (_outputConfig == OutputConfigs.VerticalLeft) || (_outputConfig == OutputConfigs.VerticalRight);
+            _rtUpdateZone.rotation = vertical ? 270f : 0f;
+
+            Loader.gpuSerializerManager.FullUpdate();
+        }
+    }
+
+    private CustomRenderTextureUpdateZone _rtUpdateZone;
+
+    private bool _gammaCorrection;
+    private bool _rgbGridMode;
+    private OutputConfigs _outputConfig;
     
     public VRSL(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 3), int ?universe = 0, int ?blockSize = 16, int ?rowCount = 13)
     {   
@@ -35,6 +71,10 @@ public class VRSL : IDMXSerializer
         Universe = universe ?? 0;
         BlockSize = blockSize ?? 16; // 16x16 pixels per channel block
         RowCount = rowCount ?? 13; // 13 blocks per column, linear, VRSL spec
+
+        _gammaCorrection = true;
+        _rgbGridMode = false;
+        _outputConfig = OutputConfigs.HorizontalTop;
 
         CustomRenderTextureUpdateZone updateZone = new CustomRenderTextureUpdateZone();
         

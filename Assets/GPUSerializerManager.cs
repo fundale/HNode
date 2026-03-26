@@ -8,8 +8,6 @@ public class GPUSerializerManager : MonoBehaviour
     public CustomRenderTexture gpuSerializerRenderTexture;
     public int universeCount = 32;
 
-    public int gpuSerializerFlags;
-
     private Texture2D serializerTexture;
     private Texture2D metaTexture;
     private byte[] dataBuffer;
@@ -116,11 +114,29 @@ public class GPUSerializerManager : MonoBehaviour
             
             int serializerBlockRow = (serializerRows << 6) | serializerBlockSize;
 
-            return new Vector4(serializer.Size.x, serializer.Size.y, serializerBlockRow, gpuSerializerFlags << 2);
-            }).ToArray());
+            int orientationMode = 0;
+
+            switch (serializer.GetType().Name)
+            {
+                case "VRSL":
+                    VRSL vrslSerializer = (VRSL)serializer;
+
+                    orientationMode = vrslSerializer.RGBGridMode ? 1 : 0;
+                    orientationMode = (orientationMode << 1) | (vrslSerializer.GammaCorrection ? 1 : 0);
+                    break;
+
+                default:
+                    break;
+            }
+
+            orientationMode = (orientationMode << 2) | 0x0; // Vertical and Horizontal flip
+
+            return new Vector4(serializer.Size.x, serializer.Size.y, serializerBlockRow, orientationMode);
+        }).ToArray());
+
         gpuSerializerRenderTexture.material.SetVectorArray("_SerializerRanges", dmxSerializers.Select(serializer => {
             return new Vector4(serializer.DataOffset, serializer.DataLength, 0, 0);
-            }).ToArray());
+        }).ToArray());
 
         gpuSerializerRenderTexture.Initialize(); // Clear canvas when serializer layout changes
         gpuSerializerRenderTexture.Update(); // Just in case we update zones in between data refresh and frame presentation.
@@ -134,6 +150,12 @@ public class GPUSerializerManager : MonoBehaviour
         serializerTexture.Apply();
 
         gpuSerializerRenderTexture.Update();
+    }
+
+    public void FullUpdate()
+    {
+        UpdateGPUSerializerZones(ref Loader.showconf.Serializers);
+        UpdateGPUSerializerChannelMeta();
     }
 
     public static int FindPass(object passObject)
