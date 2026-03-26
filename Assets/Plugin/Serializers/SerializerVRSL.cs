@@ -19,13 +19,14 @@ public class VRSL : IDMXSerializer
     public int DataLength { get; }
     public int Universe { get; }
     public int BlockSize { get; }
+    public int RowCount { get; }
     public CustomRenderTextureUpdateZone RTUpdateZone { get; }
-    const int blocksPerCol = 13; // channels per column
+
     public bool GammaCorrection = true;
     public bool RGBGridMode = false;
     public OutputConfigs outputConfig = OutputConfigs.HorizontalTop;
     
-    public VRSL(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 3), int ?universe = 0, int ?blockSize = 16)
+    public VRSL(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 3), int ?universe = 0, int ?blockSize = 16, int ?rowCount = 13)
     {   
         Origin = origin ?? Vector2.zero;
         Size = size ?? new Vector2(1920, 208);
@@ -33,6 +34,7 @@ public class VRSL : IDMXSerializer
         DataLength = dataLength ?? (512 * 3);
         Universe = universe ?? 0;
         BlockSize = blockSize ?? 16; // 16x16 pixels per channel block
+        RowCount = rowCount ?? 13; // 13 blocks per column, linear, VRSL spec
 
         CustomRenderTextureUpdateZone updateZone = new CustomRenderTextureUpdateZone();
         
@@ -59,7 +61,7 @@ public class VRSL : IDMXSerializer
                 break;
             case OutputConfigs.HorizontalBottom:
                 x += universeOffset;
-                y += textureHeight - (blocksPerCol * BlockSize); // Shift down for horizontal bottom layout
+                y += textureHeight - (RowCount * BlockSize); // Shift down for horizontal bottom layout
                 break;
             case OutputConfigs.VerticalLeft:
                 //swap x and y
@@ -78,7 +80,7 @@ public class VRSL : IDMXSerializer
                 y += universeOffset;
                 //flip Y coordinate
                 y = textureHeight - y - BlockSize; // Flip Y coordinate for vertical layout
-                x += textureWidth - (blocksPerCol * BlockSize); // Shift to the right for vertical right layout
+                x += textureWidth - (RowCount * BlockSize); // Shift to the right for vertical right layout
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(outputConfig), outputConfig, null);
@@ -170,11 +172,11 @@ public class VRSL : IDMXSerializer
             universe = universe % 3; // Limit to 3 channels for RGB grid
         }
 
-        x = (channelInUniverse / blocksPerCol) * BlockSize;
-        y = (channelInUniverse % blocksPerCol) * BlockSize;
+        x = (channelInUniverse / RowCount) * BlockSize;
+        y = (channelInUniverse % RowCount) * BlockSize;
 
         //stupid universe bullshit in VRSL
-        universeOffset = universe * (512 / blocksPerCol * BlockSize) + (universe * BlockSize);
+        universeOffset = universe * (512 / RowCount * BlockSize) + (universe * BlockSize);
     }
     
     /// <summary>

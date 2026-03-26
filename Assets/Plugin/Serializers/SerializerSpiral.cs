@@ -11,6 +11,7 @@ public class Spiral : IDMXSerializer
     public int DataLength { get; }
     public int Universe { get; }
     public int BlockSize { get; }
+    public int RowCount { get; }
     public CustomRenderTextureUpdateZone RTUpdateZone { get; }
     int x = 0;
     int y = 0;
@@ -25,6 +26,7 @@ public class Spiral : IDMXSerializer
         DataLength = dataLength ?? (512 * 32); // TODO: Change
         Universe = universe ?? 0;
         BlockSize = blockSize ?? 8; // 8x8 pixels per channel block
+        RowCount = 0; // Unsupported due to layout, linear
 
         CustomRenderTextureUpdateZone updateZone = new CustomRenderTextureUpdateZone();
         

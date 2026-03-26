@@ -11,10 +11,10 @@ public class ColorBinary : IDMXSerializer
     public int DataLength { get; }
     public int Universe { get; }
     public int BlockSize { get; }
+    public int RowCount { get; }
     public CustomRenderTextureUpdateZone RTUpdateZone { get; }
-    const int blocksPerCol = 52; // channels per column
     
-    public ColorBinary(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 1), int ?universe = 0, int ?blockSize = 4)
+    public ColorBinary(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 1), int ?universe = 0, int ?blockSize = 4, int ?rowCount = 52)
     {
         Origin = origin ?? Vector2.zero;
         Size = size ?? new Vector2(1920, 208);
@@ -22,6 +22,7 @@ public class ColorBinary : IDMXSerializer
         DataLength = dataLength ?? (512 * 1); // TODO: Change
         Universe = universe ?? 0;
         BlockSize = blockSize ?? 4; // 4x4 pixels per channel block
+        RowCount = rowCount ?? 52; // 52 blocks per column, RGB packed binary
 
         CustomRenderTextureUpdateZone updateZone = new CustomRenderTextureUpdateZone();
         
@@ -50,8 +51,8 @@ public class ColorBinary : IDMXSerializer
         for (int i = 0; i < bitsList.Count; i += 3)
         {
             int newChannel = (channel * 3) + i / 3; //3 because we interlace with color
-            int x = (newChannel / blocksPerCol) * BlockSize;
-            int y = (newChannel % blocksPerCol) * BlockSize;
+            int x = (newChannel / RowCount) * BlockSize;
+            int y = (newChannel % RowCount) * BlockSize;
             if (x >= textureWidth || y >= textureHeight)
             {
                 continue; // Skip if the calculated pixel is out of bounds

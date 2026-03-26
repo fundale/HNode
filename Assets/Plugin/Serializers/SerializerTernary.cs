@@ -13,10 +13,10 @@ public class Ternary : IDMXSerializer
     public int DataLength { get; }
     public int Universe { get; }
     public int BlockSize { get; }
+    public int RowCount { get; }
     public CustomRenderTextureUpdateZone RTUpdateZone { get; }
-    const int blocksPerCol = 8 * 6; // channels per column
     
-    public Ternary(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 1), int ?universe = 0, int ?blockSize = 4)
+    public Ternary(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 1), int ?universe = 0, int ?blockSize = 4, int ?rowCount = 48)
     {
         Origin = origin ?? Vector2.zero;
         Size = size ?? new Vector2(1920, 208);
@@ -24,6 +24,7 @@ public class Ternary : IDMXSerializer
         DataLength = dataLength ?? (512 * 1); // TODO: Change
         Universe = universe ?? 0;
         BlockSize = blockSize ?? 4; // 4x4 pixels per channel block
+        RowCount = rowCount ?? 8 * 6; // 48 blocks per column, ternary
 
         CustomRenderTextureUpdateZone updateZone = new CustomRenderTextureUpdateZone();
         
@@ -89,8 +90,8 @@ public class Ternary : IDMXSerializer
     private void GetPositionData(int channel, int i, out int x, out int y)
     {
         int newChannel = (channel * 6) + i;
-        x = (newChannel / blocksPerCol) * BlockSize;
-        y = (newChannel % blocksPerCol) * BlockSize;
+        x = (newChannel / RowCount) * BlockSize;
+        y = (newChannel % RowCount) * BlockSize;
     }
 
     byte ConvertToByte(BitArray bits)

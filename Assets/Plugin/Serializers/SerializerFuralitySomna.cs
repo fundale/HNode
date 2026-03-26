@@ -13,13 +13,13 @@ public class FuralitySomna : IDMXSerializer
     public int DataLength { get; }
     public int Universe { get; }
     public int BlockSize { get; }
+    public int RowCount { get; }
     public CustomRenderTextureUpdateZone RTUpdateZone { get; }
-    const int blocksPerCol = 13; // channels per column
     public Dictionary<DMXChannel, ColorChannel> mergedChannels = new Dictionary<DMXChannel, ColorChannel>();
 
     int cumulativeOFfset = 0;
     
-    public FuralitySomna(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 3), int ?universe = 0, int ?blockSize = 16)
+    public FuralitySomna(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 3), int ?universe = 0, int ?blockSize = 16, int ?rowCount = 13)
     {
         Origin = origin ?? Vector2.zero;
         Size = size ?? new Vector2(1920, 208); // TODO: Change
@@ -27,6 +27,7 @@ public class FuralitySomna : IDMXSerializer
         DataLength = dataLength ?? (512 * 3); // TODO: Change
         Universe = universe ?? 0;
         BlockSize = blockSize ?? 16; // 16x16 pixels per channel block
+        RowCount = rowCount ?? 13; // 13 blocks per column, linear, RGB packed, VRSL alike
 
         CustomRenderTextureUpdateZone updateZone = new CustomRenderTextureUpdateZone();
         
@@ -46,8 +47,8 @@ public class FuralitySomna : IDMXSerializer
     public void CompleteFrame(ref Color32[] pixels, ref List<byte> channelValues, int textureWidth, int textureHeight) { }
     public void SerializeChannel(ref Color32[] pixels, byte channelValue, int channel, int textureWidth, int textureHeight)
     {
-        int x = ((channel - cumulativeOFfset) / blocksPerCol) * BlockSize;
-        int y = ((channel - cumulativeOFfset) % blocksPerCol) * BlockSize;
+        int x = ((channel - cumulativeOFfset) / RowCount) * BlockSize;
+        int y = ((channel - cumulativeOFfset) % RowCount) * BlockSize;
 
         if (mergedChannels.ContainsKey(channel))
         {

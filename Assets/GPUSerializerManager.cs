@@ -110,8 +110,17 @@ public class GPUSerializerManager : MonoBehaviour
     {
         gpuSerializerRenderTexture.SetUpdateZones(dmxSerializers.Select(serializer => serializer.RTUpdateZone).ToArray());
 
-        gpuSerializerRenderTexture.material.SetVectorArray("_SerializerSizes", dmxSerializers.Select(serializer => new Vector4(serializer.Size.x, serializer.Size.y, serializer.BlockSize, gpuSerializerFlags << 2)).ToArray());
-        gpuSerializerRenderTexture.material.SetVectorArray("_SerializerRanges", dmxSerializers.Select(serializer => new Vector4(serializer.DataOffset, serializer.DataLength, 0, 0)).ToArray());
+        gpuSerializerRenderTexture.material.SetVectorArray("_SerializerSizes", dmxSerializers.Select(serializer => {
+            int serializerBlockSize = Math.Clamp(serializer.BlockSize - 1, 0, 63) & 0x3f;
+            int serializerRows = Math.Clamp(serializer.RowCount - 1, 0, 1023) & 0x03ff;
+            
+            int serializerBlockRow = (serializerRows << 6) | serializerBlockSize;
+
+            return new Vector4(serializer.Size.x, serializer.Size.y, serializerBlockRow, gpuSerializerFlags << 2);
+            }).ToArray());
+        gpuSerializerRenderTexture.material.SetVectorArray("_SerializerRanges", dmxSerializers.Select(serializer => {
+            return new Vector4(serializer.DataOffset, serializer.DataLength, 0, 0);
+            }).ToArray());
 
         gpuSerializerRenderTexture.Initialize(); // Clear canvas when serializer layout changes
         gpuSerializerRenderTexture.Update(); // Just in case we update zones in between data refresh and frame presentation.

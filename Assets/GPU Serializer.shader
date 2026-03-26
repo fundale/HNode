@@ -44,7 +44,7 @@ Shader "HNode/GPU Serializer"
             {
                 SERIALIZER_COMMON_HEADER;
 
-                uint vBlocks = 52;
+                uint vBlocks = serializerRowSize; // 52
 
                 serializerPixel /= serializerBlockSize; // 4
 
@@ -81,7 +81,7 @@ Shader "HNode/GPU Serializer"
             {
                 SERIALIZER_COMMON_HEADER;
 
-                uint vBlocks = 52;
+                uint vBlocks = serializerRowSize; // 52
 
                 serializerPixel /= serializerBlockSize; // 4
 
@@ -145,7 +145,7 @@ Shader "HNode/GPU Serializer"
             {
                 SERIALIZER_COMMON_HEADER;
 
-                uint vBlocks = 52;
+                uint vBlocks = serializerRowSize; // 52
 
                 serializerPixel /= serializerBlockSize; // 4
 
@@ -187,7 +187,7 @@ Shader "HNode/GPU Serializer"
             {
                 SERIALIZER_COMMON_HEADER;
 
-                uint vBlocks = 13;
+                uint vBlocks = serializerRowSize; // 13
 
                 serializerPixel /= serializerBlockSize; // 16
                 uint channel = ChannelPixelGrid(serializerPixel, vBlocks) + serializerRange.x;
@@ -270,7 +270,7 @@ Shader "HNode/GPU Serializer"
             {
                 SERIALIZER_COMMON_HEADER;
 
-                uint vBlocks = BYTE_BITS * 6; // 8 * 6 = 48
+                uint vBlocks = serializerRowSize; // 8 * 6 = 48
 
                 serializerPixel /= serializerBlockSize; // 4
 
@@ -310,7 +310,7 @@ Shader "HNode/GPU Serializer"
             {
                 SERIALIZER_COMMON_HEADER;
 
-                uint vBlocks = 13;
+                uint vBlocks = serializerRowSize; // 13
 
                 serializerPixel /= serializerBlockSize; // 16
                 uint channel = ChannelPixelGrid(serializerPixel, vBlocks) + serializerRange.x;

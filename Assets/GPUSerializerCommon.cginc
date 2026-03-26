@@ -11,7 +11,7 @@ Texture2D<float> _sRGB_LUT;
 
 #define LinearToSRGB(lin) (_sRGB_LUT[uint2((lin), 0)])
 
-uniform float4 _SerializerSizes[MAX_SERIALIZERS]; // Width, Height, Block Size, Orientation + Mode
+uniform float4 _SerializerSizes[MAX_SERIALIZERS]; // Width, Height, Block Size + Row Count, Orientation + Mode
 uniform float2 _SerializerRanges[MAX_SERIALIZERS]; // Offset, Length, null, null
 
 #define SerializerSize(i) uint4(_SerializerSizes[i.primitiveID])
@@ -23,7 +23,7 @@ uniform float2 _SerializerRanges[MAX_SERIALIZERS]; // Offset, Length, null, null
 #define SerializerDataLinear(channel) SerializerData((channel) % UNIVERSE_SIZE, (channel) / UNIVERSE_SIZE)
 
 #define SerializerMode(zoneData) (zoneData.w >> 2)
-#define SerializerOrientation(zoneData) (zoneData.w & 3)
+#define SerializerOrientation(zoneData) (zoneData.w & 0x03)
 
 #define SERIALIZER_COMMON_HEADER \
     uint4 serializerSize = SerializerSize(i); \
@@ -31,25 +31,26 @@ uniform float2 _SerializerRanges[MAX_SERIALIZERS]; // Offset, Length, null, null
     float4 serializerColor = 0.0; \
     uint2 serializerPixel = SerializerPixel(i); \
     uint2 serializerRange = SerializerRange(i).xy; \
-    uint serializerBlockSize = serializerSize.z;
+    uint serializerBlockSize = ((serializerSize.z & 0x3f) + 1); \
+    uint serializerRowSize = (((serializerSize.z >> 6) & 0x03ff) + 1);
 
 #define CHANNEL_COMMON_META(channel) \
     uint channelMeta = ChannelGetMeta(channel); \
-    bool renderChannel = (channelMeta) & 1; \
-    int perChannelOffset = ((channelMeta) >> 4) * (((channelMeta >> 1) & 1) ? -1 : 1);
+    bool renderChannel = (channelMeta) & 0x01; \
+    int perChannelOffset = ((channelMeta) >> 4) * (((channelMeta >> 1) & 0x01) ? -1 : 1);
 
 #define ChannelPixelGrid(pixel, rows) (pixel.x * rows + pixel.y)
 #define ChannelGetByte(channel) (uint(SerializerDataLinear((channel)) * 0xff))
-#define ChannelGetBit(channel, bit) ((ChannelGetByte(channel) >> bit) & 1)
+#define ChannelGetBit(channel, bit) ((ChannelGetByte(channel) >> bit) & 0x01)
 
 #define ChannelGetMeta(channel) (uint(_serializerMeta[uint2((channel) % UNIVERSE_SIZE, (channel) / UNIVERSE_SIZE)] * 0xffff))
 
 inline void SerializerUVFlip(inout float2 uv, uint orient)
 {
-    if (!(orient & 1))
+    if (!(orient & 0x01))
         uv.y = 1.0 - uv.y;
 
-    if ((orient >> 1) & 1)
+    if ((orient >> 1) & 0x01)
         uv.x = 1.0 - uv.x;
 }
 

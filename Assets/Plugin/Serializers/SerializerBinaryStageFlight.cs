@@ -12,12 +12,13 @@ public class BinaryStageFlight : IDMXSerializer
     public int DataLength { get; }
     public int Universe { get; }
     public int BlockSize { get; }
+    public int RowCount { get; }
     public CustomRenderTextureUpdateZone RTUpdateZone { get; }
     const int channelsPerCol = 6;
     const int blocksPerCol = channelsPerCol * 8; // channels per column
     const int CRCBits = 4;
     
-    public BinaryStageFlight(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 28), int ?universe = 0, int ?blockSize = 4)
+    public BinaryStageFlight(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 28), int ?universe = 0, int ?blockSize = 4, int ?rowCount = 52)
     {
         Origin = origin ?? Vector2.zero;
         Size = size ?? new Vector2(1920, 1080);
@@ -25,6 +26,7 @@ public class BinaryStageFlight : IDMXSerializer
         DataLength = dataLength ?? (512 * 28);
         Universe = universe ?? 0;
         BlockSize = blockSize ?? 4; // 4x4 pixels per channel block
+        RowCount = rowCount ?? 8 * channelsPerCol + CRCBits; // 52 blocks per column, binary + CRC (8 bits * 6 channels + 4 CRC bits)
 
         CustomRenderTextureUpdateZone updateZone = new CustomRenderTextureUpdateZone();
         

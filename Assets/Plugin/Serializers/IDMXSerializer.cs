@@ -31,6 +31,10 @@ public interface IDMXSerializer : IUserInterface<IDMXGenerator>, IConstructable
     /// </summary>
     public int BlockSize { get; }
     /// <summary>
+    /// How many rows before wrapping the data.
+    /// </summary>
+    public int RowCount { get; }
+    /// <summary>
     /// The GPU Serializer update info.
     /// </summary>
     public CustomRenderTextureUpdateZone RTUpdateZone { get; }
