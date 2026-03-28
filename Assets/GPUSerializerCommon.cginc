@@ -11,6 +11,8 @@ Texture2D<float> _sRGB_LUT;
 
 #define LinearToSRGB(lin) (_sRGB_LUT[uint2((lin), 0)])
 
+uniform int _ChannelCount;
+
 uniform float4 _SerializerSizes[MAX_SERIALIZERS]; // Width, Height, Block Size + Row Count, Orientation + Mode
 uniform float2 _SerializerRanges[MAX_SERIALIZERS]; // Offset, Length, null, null
 
@@ -31,6 +33,7 @@ uniform float2 _SerializerRanges[MAX_SERIALIZERS]; // Offset, Length, null, null
     float4 serializerColor = 0.0; \
     uint2 serializerPixel = SerializerPixel(i); \
     uint2 serializerRange = SerializerRange(i).xy; \
+    serializerRange.y = min(serializerRange.y, _ChannelCount); \
     uint serializerBlockSize = ((serializerSize.z & 0x3f) + 1); \
     uint serializerRowSize = (((serializerSize.z >> 6) & 0x03ff) + 1);
 

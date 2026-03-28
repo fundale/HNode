@@ -11,6 +11,7 @@ public class GPUSerializerManager : MonoBehaviour
     private Texture2D serializerTexture;
     private Texture2D metaTexture;
     private byte[] dataBuffer;
+    private int _channelCountID;
 
     public Texture2D Generate_sRGB_LUT()
     {
@@ -25,6 +26,8 @@ public class GPUSerializerManager : MonoBehaviour
     
     void Start()
     {
+        _channelCountID = Shader.PropertyToID("_ChannelCount");
+
         serializerTexture = new Texture2D(512, universeCount, TextureFormat.R8, false, true);
         serializerTexture.filterMode = FilterMode.Point;
         serializerTexture.wrapMode = TextureWrapMode.Clamp;
@@ -149,6 +152,7 @@ public class GPUSerializerManager : MonoBehaviour
         serializerTexture.LoadRawTextureData(dataBuffer);
         serializerTexture.Apply();
 
+        gpuSerializerRenderTexture.material.SetInteger(_channelCountID, serializerData.Count);
         gpuSerializerRenderTexture.Update();
     }
 
