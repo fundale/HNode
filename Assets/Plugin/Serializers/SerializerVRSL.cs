@@ -72,6 +72,28 @@ public class VRSL : IDMXSerializer
             _outputConfig = value;
 
             bool vertical = (_outputConfig == OutputConfigs.VerticalLeft) || (_outputConfig == OutputConfigs.VerticalRight);
+            
+            Size = new Vector2(vertical ? 1080 : 1920, Size.y);
+
+            Vector2 vOrigin = Origin;
+            Vector2 vSize = Size;
+
+            if (vertical)
+                vSize = new Vector2(Size.y, Size.x);
+            
+            switch (_outputConfig)
+            {
+                case OutputConfigs.VerticalRight:
+                    vOrigin.x = 1920 - Size.y;
+                    break;
+
+                case OutputConfigs.HorizontalBottom:
+                    vOrigin.y = 1080 - Size.y;
+                    break;
+            }
+
+            _rtUpdateZone.updateZoneCenter = (vSize / 2) + vOrigin;
+            _rtUpdateZone.updateZoneSize = Size;
             _rtUpdateZone.rotation = vertical ? 270f : 0f;
 
             Loader.gpuSerializerManager.FullUpdate();
