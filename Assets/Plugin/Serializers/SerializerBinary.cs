@@ -5,14 +5,47 @@ using UnityEngine;
 
 public class Binary : IDMXSerializer
 {
-    public Vector2 Origin { get; }
-    public Vector2 Size { get; }
-    public int DataOffset { get; }
-    public int DataLength { get; }
-    public int Universe { get; }
-    public int BlockSize { get; }
-    public int RowCount { get; }
-    public CustomRenderTextureUpdateZone RTUpdateZone { get; }
+    public Vector2 Origin {
+        get => _origin;
+        set => _origin = value;
+    }
+    public Vector2 Size {
+        get => _size;
+        set => _size = value;
+    }
+    public int DataOffset {
+        get => _dataOffset;
+        set => _dataOffset = value;
+    }
+    public int DataLength {
+        get => _dataLength;
+        set => _dataLength = value;
+    }
+    public int Universe {
+        get => _universe;
+        set => _universe = value;
+    }
+    public int BlockSize {
+        get => _blockSize;
+        set => _blockSize = value;
+    }
+    public int RowCount {
+        get => _rowCount;
+        set => _rowCount = value;
+    }
+    public CustomRenderTextureUpdateZone RTUpdateZone {
+        get => _rtUpdateZone;
+        set => _rtUpdateZone = value;
+    }
+
+    private Vector2 _origin;
+    private Vector2 _size;
+    private int _dataOffset;
+    private int _dataLength;
+    private int _universe;
+    private int _blockSize;
+    private int _rowCount;
+    private CustomRenderTextureUpdateZone _rtUpdateZone;
     
     public Binary(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 7), int ?universe = 0, int ?blockSize = 4, int ?rowCount = 52)
     {
