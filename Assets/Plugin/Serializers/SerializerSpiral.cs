@@ -30,8 +30,7 @@ public class Spiral : IDMXSerializer
         set => _blockSize = value;
     }
     public int RowCount {
-        get => _rowCount;
-        set => _rowCount = value;
+        get;
     }
     public CustomRenderTextureUpdateZone RTUpdateZone {
         get => _rtUpdateZone;
@@ -44,7 +43,6 @@ public class Spiral : IDMXSerializer
     private int _dataLength;
     private int _universe;
     private int _blockSize;
-    private int _rowCount;
     private CustomRenderTextureUpdateZone _rtUpdateZone;
 
     int x = 0;
