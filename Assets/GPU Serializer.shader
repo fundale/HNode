@@ -281,7 +281,7 @@ Shader "HNode/GPU Serializer"
                 
                 CHANNEL_COMMON_META(channel);
 
-                if (serializerPixel.y < vBlocks && (channel) < (serializerRange.x + serializerRange.y) && renderChannel)
+                if (serializerPixel.y < vBlocks && channel < (serializerRange.x + serializerRange.y) && renderChannel)
                 {
                     uint value = ChannelGetByte(channel);
                     
