@@ -100,16 +100,20 @@ Shader "HNode/GPU Serializer"
 
                 CHANNEL_COMMON_META(channel);
 
-                renderChannel = true; // TODO: Remove
-
-                if (renderChannel) // channel < (serializerRange.x + serializerRange.y) &&  // TODO: Need to add extra slack for the end CRC 4 bits
+                if (serializerPixel.y < vBlocks - 4) // Binary data
                 {
-                    if (serializerPixel.y < vBlocks - 4) // Binary data
+                    if (channel < (serializerRange.x + serializerRange.y) && renderChannel)
                     {
                         serializerColor = ChannelGetBit(channel, 7 - channelBit);
                         serializerColor.a = 1.0;
-                    } else
-                    if (serializerPixel.y < vBlocks) // CRC generator
+                    }
+                } else
+                if (serializerPixel.y < vBlocks) // CRC generator
+                {
+                    uint crcBar = (channel / 6) - 1;
+                    bool rollForward = (((channel - 6) % 1536) != 0);
+
+                    if (crcBar < ((serializerRange.x + serializerRange.y) / 6) + rollForward) // Roll forward to add extra slack for the end CRC 4 bits
                     {
                         uint crcBitIndex = (serializerPixel.y - 48);
                         uint crcv = 0;
