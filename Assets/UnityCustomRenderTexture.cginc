@@ -168,6 +168,9 @@ v2f_customrendertexture CustomRenderTextureVertexShader(appdata_customrendertext
     // Compute quad vertex position
     float2 clipSpaceCenter = updateZoneCenter.xy * 2.0 - 1.0;
     float2 pos = vertexPositions[vertexID] * updateZoneSize.xy;
+    float distoredAmount = lerp(1.0, 1.777777, abs(sin(rotation)));
+    pos.y /= distoredAmount;
+    pos.x *= distoredAmount;
     pos = CustomRenderTextureRotate2D(pos, rotation);
     pos.x += clipSpaceCenter.x;
 #if UNITY_UV_STARTS_AT_TOP
