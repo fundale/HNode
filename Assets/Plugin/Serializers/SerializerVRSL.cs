@@ -130,7 +130,7 @@ public class VRSL : IDMXSerializer
                 break;
             case OutputConfigs.HorizontalBottom:
                 x += universeOffset;
-                y += textureHeight - (RowCount * BlockSize); // Shift down for horizontal bottom layout
+                y += textureHeight - (_rowCount * _blockSize); // Shift down for horizontal bottom layout
                 break;
             case OutputConfigs.VerticalLeft:
                 //swap x and y
@@ -139,7 +139,7 @@ public class VRSL : IDMXSerializer
                 y = temp;
                 y += universeOffset;
                 //flip Y coordinate
-                y = textureHeight - y - BlockSize; // Flip Y coordinate for vertical layout
+                y = textureHeight - y - _blockSize; // Flip Y coordinate for vertical layout
                 break;
             case OutputConfigs.VerticalRight:
                 //swap x and y
@@ -148,8 +148,8 @@ public class VRSL : IDMXSerializer
                 y = temp;
                 y += universeOffset;
                 //flip Y coordinate
-                y = textureHeight - y - BlockSize; // Flip Y coordinate for vertical layout
-                x += textureWidth - (RowCount * BlockSize); // Shift to the right for vertical right layout
+                y = textureHeight - y - _blockSize; // Flip Y coordinate for vertical layout
+                x += textureWidth - (_rowCount * _blockSize); // Shift to the right for vertical right layout
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(outputConfig), outputConfig, null);
@@ -186,11 +186,11 @@ public class VRSL : IDMXSerializer
                 default:
                     return;
             }
-            TextureWriter.MixColorBlock(ref pixels, x, y, value, cchannel, BlockSize);
+            TextureWriter.MixColorBlock(ref pixels, x, y, value, cchannel, _blockSize);
         }
         else
         {
-            TextureWriter.MakeColorBlock(ref pixels, x, y, color, BlockSize);
+            TextureWriter.MakeColorBlock(ref pixels, x, y, color, _blockSize);
         }
     }
 
@@ -199,8 +199,8 @@ public class VRSL : IDMXSerializer
         GetPositionData(channel, out int x, out int y, out int universeOffset);
 
         //add a half offset to get the center
-        x += BlockSize / 2;
-        y += BlockSize / 2;
+        x += _blockSize / 2;
+        y += _blockSize / 2;
 
         // Get the color block from the texture
         Color color = TextureReader.GetColor(tex, x + universeOffset, y);
@@ -241,11 +241,11 @@ public class VRSL : IDMXSerializer
             universe = universe % 3; // Limit to 3 channels for RGB grid
         }
 
-        x = (channelInUniverse / RowCount) * BlockSize;
-        y = (channelInUniverse % RowCount) * BlockSize;
+        x = (channelInUniverse / _rowCount) * _blockSize;
+        y = (channelInUniverse % _rowCount) * _blockSize;
 
         //stupid universe bullshit in VRSL
-        universeOffset = universe * (512 / RowCount * BlockSize) + (universe * BlockSize);
+        universeOffset = universe * (512 / _rowCount * _blockSize) + (universe * _blockSize);
     }
     
     /// <summary>

@@ -83,13 +83,13 @@ public class Spiral : IDMXSerializer
 
     public void SerializeChannel(ref Color32[] pixels, byte channelValue, int channel, int textureWidth, int textureHeight)
     {
-        int scaledWidth = textureWidth / BlockSize;
-        int scaledHeight = textureHeight / BlockSize;
+        int scaledWidth = textureWidth / _blockSize;
+        int scaledHeight = textureHeight / _blockSize;
 
 
         //multiply up by block size
-        int xfinal = x * BlockSize;
-        int yfinal = y * BlockSize;
+        int xfinal = x * _blockSize;
+        int yfinal = y * _blockSize;
 
         //convert the x y to pixel index
         //return 4x4 area
@@ -99,7 +99,7 @@ public class Spiral : IDMXSerializer
             channelValue,
             Util.GetBlockAlpha(channelValue)
         );
-        TextureWriter.MakeColorBlock(ref pixels, xfinal, yfinal, color, BlockSize);
+        TextureWriter.MakeColorBlock(ref pixels, xfinal, yfinal, color, _blockSize);
 
         int nextX = x;
         int nextY = y;

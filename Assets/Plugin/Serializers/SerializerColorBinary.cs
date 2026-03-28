@@ -84,8 +84,8 @@ public class ColorBinary : IDMXSerializer
         for (int i = 0; i < bitsList.Count; i += 3)
         {
             int newChannel = (channel * 3) + i / 3; //3 because we interlace with color
-            int x = (newChannel / RowCount) * BlockSize;
-            int y = (newChannel % RowCount) * BlockSize;
+            int x = (newChannel / _rowCount) * _blockSize;
+            int y = (newChannel % _rowCount) * _blockSize;
             if (x >= textureWidth || y >= textureHeight)
             {
                 continue; // Skip if the calculated pixel is out of bounds
@@ -98,7 +98,7 @@ public class ColorBinary : IDMXSerializer
                 (byte)(bitsList[i + 2] ? 255 : 0),
                 Util.GetBlockAlpha(channelValue)
             );
-            TextureWriter.MakeColorBlock(ref pixels, x, y, color, BlockSize);
+            TextureWriter.MakeColorBlock(ref pixels, x, y, color, _blockSize);
         }
     }
 

@@ -76,7 +76,7 @@ public class BinaryStageFlight : IDMXSerializer
     public void CompleteFrame(ref Color32[] pixels, ref List<byte> channelValues, int textureWidth, int textureHeight)
     {
         //figure out the lowest pixel it wouldve drawn before
-        int startY = blocksPerCol * BlockSize;
+        int startY = blocksPerCol * _blockSize;
 
         //expand channelValues to a multiple of channelsPerCol
         int rounded = (int)(Math.Ceiling(channelValues.Count / (double)channelsPerCol) * channelsPerCol);
@@ -90,12 +90,12 @@ public class BinaryStageFlight : IDMXSerializer
             var crc = Crc4(values);
 
             //calculate the x
-            int x = (i / channelsPerCol) * BlockSize;
+            int x = (i / channelsPerCol) * _blockSize;
             //draw the 4 bits
             var bits = new BitArray(new byte[] { crc });
             for (int j = 0; j < /* bits.Length */ CRCBits; j++)
             {
-                int y = startY + j * BlockSize;
+                int y = startY + j * _blockSize;
                 CalculateWrapping(x, y, out int xd, out int yd, textureWidth);
                 //convert the x y to pixel index
                 //return 4x4 area
@@ -108,7 +108,7 @@ public class BinaryStageFlight : IDMXSerializer
                     (byte)(bits[j] ? 255 : 0), */
                     Util.GetBlockAlpha(255) // Alpha should be forced on always
                 );
-                TextureWriter.MakeColorBlock(ref pixels, xd, yd, color, BlockSize);
+                TextureWriter.MakeColorBlock(ref pixels, xd, yd, color, _blockSize);
             }
         }
     }
@@ -135,7 +135,7 @@ public class BinaryStageFlight : IDMXSerializer
                 val,
                 Util.GetBlockAlpha(channelValue)
             );
-            TextureWriter.MakeColorBlock(ref pixels, x, y, color, BlockSize);
+            TextureWriter.MakeColorBlock(ref pixels, x, y, color, _blockSize);
         }
     }
 
@@ -166,8 +166,8 @@ public class BinaryStageFlight : IDMXSerializer
         //int newChannel = (channel * 8) + i;
         //encode backwards, endiannes flip
         int newChannel = (channel * 8) + (7 - i);
-        x = (newChannel / blocksPerCol) * BlockSize;
-        y = (newChannel % blocksPerCol) * BlockSize;
+        x = (newChannel / blocksPerCol) * _blockSize;
+        y = (newChannel % blocksPerCol) * _blockSize;
         CalculateWrapping(x, y, out x, out y, textureWidth);
     }
 
@@ -175,7 +175,7 @@ public class BinaryStageFlight : IDMXSerializer
     {
         int wrap = x / textureWidth;
         adjx = x % textureWidth;
-        adjy = y + (wrap * (blocksPerCol + CRCBits) * BlockSize); // +4 is for the CRC bits
+        adjy = y + (wrap * (blocksPerCol + CRCBits) * _blockSize); // +4 is for the CRC bits
     }
 
     byte ConvertToByte(BitArray bits)

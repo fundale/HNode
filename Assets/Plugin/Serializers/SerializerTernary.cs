@@ -95,7 +95,7 @@ public class Ternary : IDMXSerializer
                 intensity,
                 Util.GetBlockAlpha(channelValue)
             );
-            TextureWriter.MakeColorBlock(ref pixels, x, y, color, BlockSize);
+            TextureWriter.MakeColorBlock(ref pixels, x, y, color, _blockSize);
         }
     }
 
@@ -123,8 +123,8 @@ public class Ternary : IDMXSerializer
     private void GetPositionData(int channel, int i, out int x, out int y)
     {
         int newChannel = (channel * 6) + i;
-        x = (newChannel / RowCount) * BlockSize;
-        y = (newChannel % RowCount) * BlockSize;
+        x = (newChannel / _rowCount) * _blockSize;
+        y = (newChannel % _rowCount) * _blockSize;
     }
 
     byte ConvertToByte(BitArray bits)

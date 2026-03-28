@@ -81,13 +81,13 @@ public class FuralitySomna : IDMXSerializer
     public void CompleteFrame(ref Color32[] pixels, ref List<byte> channelValues, int textureWidth, int textureHeight) { }
     public void SerializeChannel(ref Color32[] pixels, byte channelValue, int channel, int textureWidth, int textureHeight)
     {
-        int x = ((channel - cumulativeOFfset) / RowCount) * BlockSize;
-        int y = ((channel - cumulativeOFfset) % RowCount) * BlockSize;
+        int x = ((channel - cumulativeOFfset) / _rowCount) * _blockSize;
+        int y = ((channel - cumulativeOFfset) % _rowCount) * _blockSize;
 
         if (mergedChannels.ContainsKey(channel))
         {
             ColorChannel channelType = mergedChannels[channel];
-            TextureWriter.MixColorBlock(ref pixels, x, y, channelValue, channelType, BlockSize);
+            TextureWriter.MixColorBlock(ref pixels, x, y, channelValue, channelType, _blockSize);
         }
         else
         {
@@ -97,7 +97,7 @@ public class FuralitySomna : IDMXSerializer
                 channelValue,
                 Util.GetBlockAlpha(channelValue)
             );
-            TextureWriter.MakeColorBlock(ref pixels, x, y, color, BlockSize);
+            TextureWriter.MakeColorBlock(ref pixels, x, y, color, _blockSize);
         }
 
         if (mergedChannels.ContainsKey(channel))
