@@ -17,7 +17,7 @@ Shader "HNode/GPU Serializer"
             Name "Clear"
             HLSLPROGRAM
 
-            #include "UnityCustomRenderTexture.cginc"
+            #include "Assets/UnityCustomRenderTexture.cginc"
 
             #pragma vertex CustomRenderTextureVertexShader
             #pragma fragment frag
@@ -35,7 +35,7 @@ Shader "HNode/GPU Serializer"
             HLSLPROGRAM
 
             #include "GPUSerializerCommon.cginc"
-            #include "UnityCustomRenderTexture.cginc"
+            #include "Assets/UnityCustomRenderTexture.cginc"
 
             #pragma vertex CustomRenderTextureVertexShader
             #pragma fragment frag
@@ -72,7 +72,7 @@ Shader "HNode/GPU Serializer"
             HLSLPROGRAM
 
             #include "GPUSerializerCommon.cginc"
-            #include "UnityCustomRenderTexture.cginc"
+            #include "Assets/UnityCustomRenderTexture.cginc"
 
             #pragma vertex CustomRenderTextureVertexShader
             #pragma fragment frag
@@ -140,7 +140,7 @@ Shader "HNode/GPU Serializer"
             HLSLPROGRAM
 
             #include "GPUSerializerCommon.cginc"
-            #include "UnityCustomRenderTexture.cginc"
+            #include "Assets/UnityCustomRenderTexture.cginc"
 
             #pragma vertex CustomRenderTextureVertexShader
             #pragma fragment frag
@@ -182,7 +182,7 @@ Shader "HNode/GPU Serializer"
             HLSLPROGRAM
 
             #include "GPUSerializerCommon.cginc"
-            #include "UnityCustomRenderTexture.cginc"
+            #include "Assets/UnityCustomRenderTexture.cginc"
 
             #pragma vertex CustomRenderTextureVertexShader
             #pragma fragment frag
@@ -233,7 +233,7 @@ Shader "HNode/GPU Serializer"
             HLSLPROGRAM
 
             #include "GPUSerializerCommon.cginc"
-            #include "UnityCustomRenderTexture.cginc"
+            #include "Assets/UnityCustomRenderTexture.cginc"
 
             #pragma vertex CustomRenderTextureVertexShader
             #pragma fragment frag
@@ -265,7 +265,7 @@ Shader "HNode/GPU Serializer"
             HLSLPROGRAM
 
             #include "GPUSerializerCommon.cginc"
-            #include "UnityCustomRenderTexture.cginc"
+            #include "Assets/UnityCustomRenderTexture.cginc"
 
             #pragma vertex CustomRenderTextureVertexShader
             #pragma fragment frag
@@ -305,7 +305,7 @@ Shader "HNode/GPU Serializer"
             HLSLPROGRAM
 
             #include "GPUSerializerCommon.cginc"
-            #include "UnityCustomRenderTexture.cginc"
+            #include "Assets/UnityCustomRenderTexture.cginc"
 
             #pragma vertex CustomRenderTextureVertexShader
             #pragma fragment frag
