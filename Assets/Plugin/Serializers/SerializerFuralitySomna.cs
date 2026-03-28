@@ -19,12 +19,12 @@ public class FuralitySomna : IDMXSerializer
 
     int cumulativeOFfset = 0;
     
-    public FuralitySomna(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 3), int ?universe = 0, int ?blockSize = 16, int ?rowCount = 13)
+    public FuralitySomna(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 4), int ?universe = 0, int ?blockSize = 16, int ?rowCount = 13)
     {
         Origin = origin ?? Vector2.zero;
         Size = size ?? new Vector2(1920, 208); // TODO: Change
         DataOffset = dataOffset ?? 0;
-        DataLength = dataLength ?? (512 * 3); // TODO: Change
+        DataLength = dataLength ?? (512 * 4); // TODO: Change
         Universe = universe ?? 0;
         BlockSize = blockSize ?? 16; // 16x16 pixels per channel block
         RowCount = rowCount ?? 13; // 13 blocks per column, linear, RGB packed, VRSL alike

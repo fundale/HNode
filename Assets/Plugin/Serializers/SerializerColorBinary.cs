@@ -14,12 +14,12 @@ public class ColorBinary : IDMXSerializer
     public int RowCount { get; }
     public CustomRenderTextureUpdateZone RTUpdateZone { get; }
     
-    public ColorBinary(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 1), int ?universe = 0, int ?blockSize = 4, int ?rowCount = 52)
+    public ColorBinary(Vector2 ?origin, Vector2 ?size, int ?dataOffset = 0, int ?dataLength = (512 * 17), int ?universe = 0, int ?blockSize = 4, int ?rowCount = 52)
     {
         Origin = origin ?? Vector2.zero;
         Size = size ?? new Vector2(1920, 208);
         DataOffset = dataOffset ?? 0;
-        DataLength = dataLength ?? (512 * 1); // TODO: Change
+        DataLength = dataLength ?? (512 * 17); // TODO: Change
         Universe = universe ?? 0;
         BlockSize = blockSize ?? 4; // 4x4 pixels per channel block
         RowCount = rowCount ?? 52; // 52 blocks per column, RGB packed binary
