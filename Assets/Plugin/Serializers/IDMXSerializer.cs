@@ -9,35 +9,35 @@ public interface IDMXSerializer : IUserInterface<IDMXGenerator>, IConstructable
     /// <summary>
     /// The beginning of the Serializer on the Canvas. (top left)
     /// </summary>
-    public Vector2 Origin { get; }
+    public Vector2 Origin { get; set; }
     /// <summary>
     /// Size of the Serializer.
     /// </summary>
-    public Vector2 Size { get; }
+    public Vector2 Size { get; set; }
     /// <summary>
     /// Beginning of the Serializer data in a Universe.
     /// </summary>
-    public int DataOffset { get; }
+    public int DataOffset { get; set; }
     /// <summary>
     /// Size of Serilaizer data in the Universe.
     /// </summary>
-    public int DataLength { get; }
+    public int DataLength { get; set; }
     /// <summary>
     /// The Universe to start the Serializer on.
     /// </summary>
-    public int Universe { get; }
+    public int Universe { get; set; }
     /// <summary>
     /// The block size of each data byte value or bit.
     /// </summary>
-    public int BlockSize { get; }
+    public int BlockSize { get; set; }
     /// <summary>
     /// How many rows before wrapping the data.
     /// </summary>
-    public int RowCount { get; }
+    public int RowCount { get; set; }
     /// <summary>
     /// The GPU Serializer update info.
     /// </summary>
-    public CustomRenderTextureUpdateZone RTUpdateZone { get; }
+    public CustomRenderTextureUpdateZone RTUpdateZone { get; set; }
 
     /// <summary>
     /// Serializes a channel from a raw byte representation, to a output video stream.

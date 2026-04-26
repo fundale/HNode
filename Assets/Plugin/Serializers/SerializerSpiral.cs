@@ -31,6 +31,7 @@ public class Spiral : IDMXSerializer
     }
     public int RowCount {
         get;
+        set;
     }
     public CustomRenderTextureUpdateZone RTUpdateZone {
         get => _rtUpdateZone;
