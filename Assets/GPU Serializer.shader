@@ -48,15 +48,17 @@ Shader "HNode/GPU Serializer"
 
                 serializerPixel /= serializerBlockSize; // 4
 
-                uint channel = ChannelPixelGrid(serializerPixel, vBlocks) + serializerRange.x;
+                uint channel = ChannelPixelGrid(serializerPixel, vBlocks);
 
                 uint channelBit = channel % BYTE_BITS;
                 channel /= BYTE_BITS;
 
                 CHANNEL_COMMON_META(channel);
 
-                if (serializerPixel.y < vBlocks && channel < (serializerRange.x + serializerRange.y) && renderChannel)
+                if (serializerPixel.y < vBlocks && channel < serializerRange.y && renderChannel)
                 {
+                    channel += serializerRange.x;
+
                     serializerColor = ChannelGetBit(channel, channelBit);
                     serializerColor.a = 1.0;
                 } else discard;
@@ -89,7 +91,7 @@ Shader "HNode/GPU Serializer"
 
                 serializerPixel.y %= vBlocks;
 
-                uint channel = ChannelPixelGrid(serializerPixel, vBlocks) + serializerRange.x;
+                uint channel = ChannelPixelGrid(serializerPixel, vBlocks);
 
                 channel -= 4 * serializerPixel.x;
 
@@ -102,8 +104,10 @@ Shader "HNode/GPU Serializer"
 
                 if (serializerPixel.y < vBlocks - 4) // Binary data
                 {
-                    if (channel < (serializerRange.x + serializerRange.y) && renderChannel)
+                    if (channel < serializerRange.y && renderChannel)
                     {
+                        channel += serializerRange.x;
+                        
                         serializerColor = ChannelGetBit(channel, 7 - channelBit);
                         serializerColor.a = 1.0;
                     }
@@ -113,12 +117,12 @@ Shader "HNode/GPU Serializer"
                     uint crcBar = (channel / 6) - 1;
                     bool rollForward = (((channel - 6) % 1536) != 0);
 
-                    if (crcBar < ((serializerRange.x + serializerRange.y) / 6) + rollForward) // Roll forward to add extra slack for the end CRC 4 bits
+                    if (crcBar < (serializerRange.y / 6) + rollForward) // Roll forward to add extra slack for the end CRC 4 bits
                     {
                         uint crcBitIndex = (serializerPixel.y - 48);
                         uint crcv = 0;
 
-                        uint crcOffset = serializerPixel.x * 6;
+                        uint crcOffset = serializerPixel.x * 6 + serializerRange.x;
                         crcOffset += univRow * 6 * (serializerSize.x / serializerBlockSize); // Muli Row
 
                         for (int indxCrc = 0; indxCrc < 6; indxCrc ++)
@@ -153,15 +157,17 @@ Shader "HNode/GPU Serializer"
 
                 serializerPixel /= serializerBlockSize; // 4
 
-                uint channel = ChannelPixelGrid(serializerPixel, vBlocks) + serializerRange.x;
+                uint channel = ChannelPixelGrid(serializerPixel, vBlocks);
 
                 uint channelBit = channel % 3;
                 channel /= 3;
 
                 CHANNEL_COMMON_META(channel);
 
-                if (serializerPixel.y < vBlocks && channel < (serializerRange.x + serializerRange.y) && (ChannelGetMeta(channel) & 1))
+                if (serializerPixel.y < vBlocks && channel < serializerRange.y && (ChannelGetMeta(channel) & 1))
                 {
+                    channel += serializerRange.x;
+
                     uint value = ChannelGetByte(channel) >> (channelBit * 3);
 
                     serializerColor.r = value & 1;
@@ -194,17 +200,15 @@ Shader "HNode/GPU Serializer"
                 uint vBlocks = serializerRowSize; // 13
 
                 serializerPixel /= serializerBlockSize; // 16
-                uint channel = ChannelPixelGrid(serializerPixel, vBlocks) + serializerRange.x;
-
-                // uint universe = channel / (UNIVERSE_SIZE + BYTE_BITS);
-                // bool validBlock = (channel % (UNIVERSE_SIZE + BYTE_BITS)) < UNIVERSE_SIZE;
-                // channel -= universe * 8;
+                uint channel = ChannelPixelGrid(serializerPixel, vBlocks);
 
                 CHANNEL_COMMON_META(channel);
                 channel += perChannelOffset;
 
-                if (serializerPixel.y < vBlocks && channel < (serializerRange.x + serializerRange.y) && renderChannel)
+                if (serializerPixel.y < vBlocks && channel < serializerRange.y && renderChannel)
                 {
+                    channel += serializerRange.x;
+
                     int colorMode = (channelMeta >> 2) & 0x03;
 
                     if (colorMode > 0)
@@ -244,12 +248,14 @@ Shader "HNode/GPU Serializer"
 
                 serializerPixel /= serializerBlockSize; // 8
 
-                uint channel = SpiralRingFromGrid(serializerSize, serializerBlockSize, serializerPixel) + serializerRange.x;
+                uint channel = SpiralRingFromGrid(serializerSize, serializerBlockSize, serializerPixel);
 
                 CHANNEL_COMMON_META(channel);
 
-                if (channel < (serializerRange.x + serializerRange.y) && renderChannel)
+                if (channel < serializerRange.y && renderChannel)
                 {
+                    channel += serializerRange.x;
+
                     serializerColor = SerializerDataLinear(channel);
                     serializerColor.a = 1.0;
                 } else discard;
@@ -278,15 +284,17 @@ Shader "HNode/GPU Serializer"
 
                 serializerPixel /= serializerBlockSize; // 4
 
-                uint channel = ChannelPixelGrid(serializerPixel, vBlocks) + serializerRange.x;
+                uint channel = ChannelPixelGrid(serializerPixel, vBlocks);
 
                 uint channelBit = 5 - (channel % 6);
                 channel /= 6;
                 
                 CHANNEL_COMMON_META(channel);
 
-                if (serializerPixel.y < vBlocks && channel < (serializerRange.x + serializerRange.y) && renderChannel)
+                if (serializerPixel.y < vBlocks && channel < serializerRange.y && renderChannel)
                 {
+                    channel += serializerRange.x;
+
                     uint value = ChannelGetByte(channel);
                     
                     serializerColor = ByteToTernary(value, channelBit) / 2.0;
@@ -317,7 +325,7 @@ Shader "HNode/GPU Serializer"
                 uint vBlocks = serializerRowSize; // 13
 
                 serializerPixel /= serializerBlockSize; // 16
-                uint channel = ChannelPixelGrid(serializerPixel, vBlocks) + serializerRange.x;
+                uint channel = ChannelPixelGrid(serializerPixel, vBlocks);
 
                 // VRSL Gaps
                 uint universe = channel / (UNIVERSE_SIZE + BYTE_BITS);
@@ -326,9 +334,11 @@ Shader "HNode/GPU Serializer"
 
                 CHANNEL_COMMON_META(channel);
 
-                if (serializerPixel.y < vBlocks && channel < (serializerRange.x + serializerRange.y) && validBlock && renderChannel)
+                if (serializerPixel.y < vBlocks && channel < serializerRange.y && validBlock && renderChannel)
                 {
                     uint vrslFlags = SerializerMode(serializerSize) & 0x03;
+
+                    channel += serializerRange.x;
 
                     serializerColor = ChannelGetByte(channel);
 
