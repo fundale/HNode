@@ -119,6 +119,9 @@ public class GPUSerializerManager : MonoBehaviour
 
             int orientationMode = 0;
 
+            bool horizontalFlip = false;
+            bool verticalFlip = false;
+
             switch (serializer.GetType().Name)
             {
                 case "VRSL":
@@ -132,7 +135,8 @@ public class GPUSerializerManager : MonoBehaviour
                     break;
             }
 
-            orientationMode = (orientationMode << 2) | 0x0; // Vertical and Horizontal flip
+            orientationMode = (orientationMode << 1) | (horizontalFlip ? 1 : 0); // Horizontal flip
+            orientationMode = (orientationMode << 1) | (verticalFlip ? 1 : 0); // Vertical flip
 
             return new Vector4(serializer.Size.x, serializer.Size.y, serializerBlockRow, orientationMode);
         }).ToArray());
