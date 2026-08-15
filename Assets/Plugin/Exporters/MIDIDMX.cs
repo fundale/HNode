@@ -22,7 +22,11 @@ public class MIDIDMX : IExporter
 {
     public bool useEditorLog = false;
     //public EquationNumber channelLimit = 2048; //Limits the number of channels we scan through for MIDIDMX, so full range scans are kept to a minimum.
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
     public string midiDevice = "loopMIDI Port"; //Default to no device selected
+#elif UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
+    public string midiDevice = "WINE ALSA Input"; // Default to Wine (possibility of connecting to a different MIDI program under Wine first)
+#endif
 
     public enum Status : int
     {
