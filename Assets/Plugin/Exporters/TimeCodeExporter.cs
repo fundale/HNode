@@ -22,6 +22,7 @@ public class TimeCodeExporter : IExporter
         if (midiInput != null)
         {
             UnityEngine.Debug.Log("Dispose");
+            midiInput.ClosePort();
             midiInput.Dispose();
             midiInput = null;
             //force GC call
@@ -166,6 +167,7 @@ public class TimeCodeExporter : IExporter
 
     public void Deconstruct()
     {
+        midiInput?.ClosePort();
         midiInput?.Dispose();
 
         foreach (var udpClient in udpClients)
