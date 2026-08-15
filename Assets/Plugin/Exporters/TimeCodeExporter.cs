@@ -9,7 +9,11 @@ using TMPro;
 
 public class TimeCodeExporter : IExporter
 {
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
     public string midiDevice = "loopMIDI Port"; //Default to no device selected
+#elif UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
+    public string midiDevice = "Virtual RawMIDI"; //Default to Reaper on Linux
+#endif
 
     private MidiIn midiInput;
     private List<UdpClient> udpClients = new List<UdpClient>();
