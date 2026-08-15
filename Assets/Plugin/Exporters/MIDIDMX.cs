@@ -5,12 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using Melanchall.DryWetMidi.Common;
-using Melanchall.DryWetMidi.Composing;
-using Melanchall.DryWetMidi.Core;
-using Melanchall.DryWetMidi.Interaction;
-using Melanchall.DryWetMidi.Multimedia;
-using Melanchall.DryWetMidi.Standards;
+using RtMidi;
+using HNode.Util.Midi;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -61,7 +57,7 @@ public class MIDIDMX : IExporter
     private int[] midiData = new int[maxChannels];
 
     private int bankStatus = 0;
-    private OutputDevice midiOutput;
+    private MidiOut midiOutput;
     private FileStream logStream;
     private int midiUpdates = 0;
     private int midiCatchup = 0;
@@ -103,8 +99,8 @@ public class MIDIDMX : IExporter
         //commented out to let exceptions through
         try
         {
-            midiOutput = OutputDevice.GetByName(device);
-            midiOutput.PrepareForEventsSending();
+            midiOutput = MidiOut.Create();
+            midiOutput.OpenPort(MidiUtil.GetMidiPort(midiOutput, device), "HNode");
         }
         catch
         {
@@ -252,25 +248,20 @@ public class MIDIDMX : IExporter
 
         if (channel < 1024)
         {
-            Send18BitMessage<NoteOnEvent>(channel, value, 0);
+            Send18BitMessage(MidiCode.NoteOn, channel, value, 0);
         }
         else
         {
-            Send18BitMessage<NoteOffEvent>(channel, value, 1024);
+            Send18BitMessage(MidiCode.NoteOff, channel, value, 1024);
         }
         midiUpdates++;
     }
 
-    private void Send18BitMessage<T>(int channel, byte channelvalue, int channeloffset) where T : NoteEvent, new()
+    private void Send18BitMessage(MidiCode noteState, int channel, byte channelvalue, int channeloffset)
     {
         int t = channel - channeloffset;
-        T noteOff = new()
-        {
-            Channel = (FourBitNumber)((t >> 6) & 0xF),
-            NoteNumber = (SevenBitNumber)(((t << 1) & 0x7F) + ((channelvalue >> 7) & 0x1)),
-            Velocity = (SevenBitNumber)(channelvalue & 0x7F)
-        };
-        midiOutput.SendEvent(noteOff);
+
+        MidiUtil.SendMidiUnsafe(midiOutput, noteState, t >> 6, ((t << 1) & 0x7F) + ((channelvalue >> 7) & 0x1), channelvalue);
     }
 
     /// <summary>
@@ -279,14 +270,7 @@ public class MIDIDMX : IExporter
     /// <param name="channel">Channel, usually 15 for MIDIDMX</param>
     private void SendMidiControl(int channel, ControlCode code)
     {
-        if (midiOutput == null) return;
-
-        ControlChangeEvent midiWD = new ControlChangeEvent();
-        midiWD.Channel = (FourBitNumber)channel;
-        midiWD.ControlNumber = (SevenBitNumber)127; //constant magic number for control codes
-        midiWD.ControlValue = (SevenBitNumber)(int)code;
-
-        midiOutput.SendEvent(midiWD);
+        MidiUtil.SendMidi(midiOutput, MidiCode.ControlChange, channel, 127, (int)code);
     }
 
     /// <summary>
