@@ -145,7 +145,11 @@ public class TimeCodeExporter : IExporter
             UnityEngine.Debug.Log("Connecting to UDP port: " + port);
 
             var udpClient = new UdpClient();
-            udpClient.Connect(IPAddress.Loopback, port);
+
+            try {
+                udpClient.Connect(IPAddress.Loopback, port);
+            } catch {}
+
             udpClients.Add(udpClient);
         }
     }
@@ -230,7 +234,9 @@ public class TimeCodeExporter : IExporter
         //try to send
         foreach (var udpClient in udpClients)
         {
-            udpClient.Send(data.ToArray(), data.Count);
+            try {
+                udpClient.Send(data.ToArray(), data.Count);
+            } catch {}
         }
     }
 
