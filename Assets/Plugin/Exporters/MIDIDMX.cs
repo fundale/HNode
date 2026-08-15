@@ -65,20 +65,6 @@ public class MIDIDMX : IExporter
     private long midiLastUpdate = 0;
 
     /// <summary>
-    /// Gets list of MIDI devices
-    /// </summary>
-    /// <returns>String List of devices</returns>
-    public List<string> GetMidiDevices()
-    {
-        List<string> tDevices = new List<string> { "(none)" };
-        ICollection<OutputDevice> devices = OutputDevice.GetAll();
-
-        tDevices.AddRange(devices.Select(device => device.Name));
-
-        return tDevices;
-    }
-
-    /// <summary>
     /// Sets active midi device, connects immediately.
     /// </summary>
     /// <param name="device">String name of device to connect to.</param>
