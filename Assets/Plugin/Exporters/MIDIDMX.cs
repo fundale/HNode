@@ -80,7 +80,9 @@ public class MIDIDMX : IExporter
         if (midiOutput != null)
         {
             UnityEngine.Debug.Log("Dispose");
-            midiOutput.ClosePort();
+            if (!midiOutput.IsClosed)
+                midiOutput.ClosePort();
+            
             midiOutput.Dispose();
             midiOutput = null;
             //force GC call
@@ -198,7 +200,9 @@ public class MIDIDMX : IExporter
     /// </summary>
     public void Deconstruct()
     {
-        midiOutput?.ClosePort();
+        if (!(midiOutput?.IsClosed ?? true))
+            midiOutput?.ClosePort();
+        
         midiOutput?.Dispose();
         logStream?.Close();
     }
