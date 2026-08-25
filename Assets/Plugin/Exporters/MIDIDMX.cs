@@ -213,6 +213,7 @@ public class MIDIDMX : IExporter
     {
         midiOutput?.Dispose();
         logStream?.Close();
+        logStream = null;
     }
 
     /// <summary>
